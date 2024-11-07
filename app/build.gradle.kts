@@ -7,6 +7,10 @@ android {
     namespace = "com.example.takeinshop"
     compileSdk = 34
 
+    buildFeatures{
+        viewBinding = true
+    }
+
     defaultConfig {
         applicationId = "com.example.takeinshop"
         minSdk = 27
