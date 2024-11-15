@@ -15,8 +15,8 @@ import com.example.takeinshop.R
 import com.example.takeinshop.databinding.ActivityShopItemBinding
 import com.example.takeinshop.domain.ShopItem
 
-class ShopItemActivity : AppCompatActivity() {
-    private lateinit var viewModel: ShopItemViewModel
+class ShopItemActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedListener {
+//    private lateinit var viewModel: ShopItemViewModel
     private lateinit var binding: ActivityShopItemBinding
     private var screenMode = MODE_UNKNOWN
     private var shopItemId = ShopItem.UNDEFINED_ID
@@ -25,89 +25,28 @@ class ShopItemActivity : AppCompatActivity() {
         enableEdgeToEdge()
         binding = ActivityShopItemBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
-            val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
-            insets
-        }
         parseIntent()
-        viewModel = ViewModelProvider(this)[ShopItemViewModel::class.java]
-        textChangeListener()
+        if (savedInstanceState == null) {
         launchRightMode()
-        observeViewModel()
+        }
     }
 
-    private fun observeViewModel() {
-        viewModel.errorInputCount.observe(this) {
-            val message = if (it) {
-                getString(R.string.error_input_count)
-            } else {
-                null
-            }
-            binding.tilCount.error = message
-        }
-        viewModel.errorInputName.observe(this) {
-            val message = if (it) {
-                getString(R.string.error_input_name)
-            } else {
-                null
-            }
-            binding.tilName.error = message
-        }
-        viewModel.isFinished.observe(this) {
-            finish()
-        }
+    override fun onEditingFinished() {
+        finish()
     }
 
     private fun launchRightMode() {
-        when (screenMode) {
-            MODE_EDIT -> launchEditMode()
-            MODE_ADD -> launchAddMode()
+        val fragment = when (screenMode) {
+            MODE_EDIT -> ShopItemFragment.newInstanceEditItem(shopItemId)
+            MODE_ADD -> ShopItemFragment.newInstanceAddItem()
+            else -> throw RuntimeException("Unknown screen mode $screenMode")
+
         }
+    supportFragmentManager.beginTransaction()
+        .replace(R.id.shop_item_container, fragment)
+        .commit()
     }
 
-    private fun textChangeListener() {
-        binding.etName.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                viewModel.resetErrorInputName()
-            }
-
-            override fun afterTextChanged(p0: Editable?) {
-            }
-        })
-        binding.etCount.addTextChangedListener(object : TextWatcher {
-            override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            }
-
-            override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                viewModel.resetErrorInputCount()
-            }
-
-            override fun afterTextChanged(p0: Editable?) {
-            }
-        })
-    }
-
-    private fun launchEditMode() {
-        viewModel.getShopItem(shopItemId)
-            viewModel.shopItem.observe(this) {
-                binding.etName.setText(it.name)
-                binding.etCount.setText(it.count.toString())
-            }
-        binding.saveButton.setOnClickListener {
-                viewModel.editShopItem(binding.etName.text?.toString(), binding.etCount.text?.toString())
-            }
-    }
-    private fun launchAddMode() {
-        with(binding){
-            saveButton.setOnClickListener {
-                viewModel.addShopItem(etName.text?.toString(), etCount.text?.toString())
-            }
-        }
-    }
     private fun parseIntent() {
         if (!intent.hasExtra(EXTRA_SCREEN_MODE)) {
             throw RuntimeException("Param screen mode is absent")
