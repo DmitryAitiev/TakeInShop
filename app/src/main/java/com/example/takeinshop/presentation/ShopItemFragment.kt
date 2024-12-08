@@ -14,17 +14,26 @@ import com.example.takeinshop.R
 import com.example.takeinshop.databinding.ActivityShopItemBinding
 import com.example.takeinshop.databinding.FragmentShopItemBinding
 import com.example.takeinshop.domain.ShopItem
+import javax.inject.Inject
 
 class ShopItemFragment: Fragment() {
 
     private lateinit var viewModel: ShopItemViewModel
     private lateinit var onEditingFinishedListener: OnEditingFinishedListener
 
+    @Inject
+    lateinit var viewModelFactory: ViewModelFactory
+
     private lateinit var binding: FragmentShopItemBinding
     private var screenMode: String = MODE_UNKNOWN
     private var shopItemId: Int = ShopItem.UNDEFINED_ID
 
+    private val component by lazy {
+        (requireActivity().application as TISApp).component
+    }
+
     override fun onAttach(context: Context) {
+        component.inject(this)
         super.onAttach(context)
         if (context is OnEditingFinishedListener) {
             onEditingFinishedListener = context
@@ -33,6 +42,8 @@ class ShopItemFragment: Fragment() {
             throw RuntimeException("Activity must implement OnEditingFinishedListener")
         }
     }
+
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,14 +54,14 @@ class ShopItemFragment: Fragment() {
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         binding = FragmentShopItemBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(this)[ShopItemViewModel::class.java]
+        viewModel = ViewModelProvider(this, viewModelFactory)[ShopItemViewModel::class.java]
         textChangeListener()
         launchRightMode()
         observeViewModel()

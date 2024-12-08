@@ -1,11 +1,12 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "com.example.takeinshop"
-    compileSdk = 34
+    compileSdk = 35
 
     buildFeatures{
         viewBinding = true
@@ -49,4 +50,11 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    implementation(libs.viewModel)
+    implementation(libs.room)
+    ksp(libs.room.compiler)
+    implementation(libs.room.ktx)
+    implementation(libs.dagger2)
+    ksp(libs.dagger2.compiler)
+    ksp(libs.dagger2.android.processor)
 }

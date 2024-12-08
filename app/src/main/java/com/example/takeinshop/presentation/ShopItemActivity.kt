@@ -14,13 +14,19 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.takeinshop.R
 import com.example.takeinshop.databinding.ActivityShopItemBinding
 import com.example.takeinshop.domain.ShopItem
+import javax.inject.Inject
 
 class ShopItemActivity : AppCompatActivity(), ShopItemFragment.OnEditingFinishedListener {
-//    private lateinit var viewModel: ShopItemViewModel
     private lateinit var binding: ActivityShopItemBinding
     private var screenMode = MODE_UNKNOWN
     private var shopItemId = ShopItem.UNDEFINED_ID
+
+    private val component by lazy {
+        (application as TISApp).component
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
+        component.inject(this)
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         binding = ActivityShopItemBinding.inflate(layoutInflater)
